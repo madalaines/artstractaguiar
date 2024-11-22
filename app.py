@@ -110,10 +110,10 @@ def approve_artwork(artwork_id):
 @admin_required
 @login_required
 def reject_artwork(artwork_id):
-    conn = get_db_connection()
-    conn.execute('UPDATE Artwork SET status = "rejected" WHERE id = ?', (artwork_id,))
-    conn.commit()
-    conn.close()
+    #conn = get_db_connection()
+    #conn.execute('UPDATE Artwork SET status = "rejected" WHERE id = ?', (artwork_id,))
+    #conn.commit()
+    #conn.close()
     delete_rejected_artwork(artwork_id, 'static/artwork')
     return redirect(url_for('validate_artwork'))
 

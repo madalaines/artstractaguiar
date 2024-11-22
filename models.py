@@ -160,8 +160,8 @@ def init_db():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         filename TEXT NOT NULL,
         status TEXT NOT NULL,
-        name TEXT,
-        price REAL
+        name TEXT NOT NULL,
+        price REAL NOT NULL
     );
     ''')
 
@@ -251,11 +251,34 @@ def delete_rejected_artwork(artwork_id, artwork_folder):
             print(f"Deleted file: {file_path}")
 
         # Delete the database entry
-        cursor.execute("DELETE FROM artworks WHERE id = ?", (artwork_id,))
+        cursor.execute("DELETE FROM Artwork WHERE id = ?", (artwork_id,))
         conn.commit()
 
     conn.close()
+    
+def delete_invalid_artworks(artwork_folder):
+    conn = get_db_connection()
+    cursor = conn.cursor()
 
+    # Find artworks with no name or price
+    cursor.execute("SELECT id, filename FROM Artwork WHERE name IS NULL OR name = '' OR price IS NULL")
+    invalid_artworks = cursor.fetchall()
+
+    for artwork_id, file_name in invalid_artworks:
+        # Delete the file
+        file_path = os.path.join(artwork_folder, file_name)
+        if os.path.exists(file_path):
+            os.remove(file_path)
+            print(f"Deleted invalid file: {file_path}")
+
+        # Delete the database entry
+        cursor.execute("DELETE FROM Artwork WHERE id = ?", (artwork_id,))
+        print(f"Deleted invalid Artwork with ID: {artwork_id}")
+
+    conn.commit()
+    conn.close()
+
+delete_invalid_artworks('static/artwork')
 cleanup_unlinked_files('static/artwork')
 
 # make_user_admin('admin@admin')
